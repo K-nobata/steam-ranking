@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>Steam 高評価ランキング</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; }
+    .item { padding: 4px 0; border-bottom: 1px solid #ddd; }
+  </style>
+</head>
+<body>
+  <h1>Steam 高評価ランキング</h1>
+  <div id="ranking"></div>
+
+  <script>
+    fetch("ranking.json")
+      .then(res => res.json())
+      .then(data => {
+        const container = document.getElementById("ranking");
+        data.forEach((game, i) => {
+          const div = document.createElement("div");
+          div.className = "item";
+          div.textContent = `${i+1}位 | AppID: ${game.appid} | ${game.rating}% (${game.total_reviews}件)`;
+          container.appendChild(div);
+        });
+      });
+  </script>
+</body>
+</html>
