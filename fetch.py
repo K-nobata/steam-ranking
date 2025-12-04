@@ -3,24 +3,21 @@ import json
 import time
 
 
-APP_LIST_URL = "https://api.steampowered.com/ISteamApps/GetAppList/v2/"
+APP_IDS = range(1, 800000)  # 1〜80万の範囲を総当り
 REVIEWS_URL = "https://store.steampowered.com/appreviews/{appid}?json=1&language=japanese"
-
-
-def get_app_list():
-    return requests.get(APP_LIST_URL).json()["applist"]["apps"]
+INFO_URL = "https://store.steampowered.com/api/appdetails?appids={appid}&l=japanese"
 
 
 def get_review_info(appid):
     try:
         url = REVIEWS_URL.format(appid=appid)
         res = requests.get(url).json()
+
         if "query_summary" not in res:
             return None
 
         summary = res["query_summary"]
         total = summary["total_reviews"]
-
         if total < 200:
             return None
 
@@ -36,21 +33,52 @@ def get_review_info(appid):
         return None
 
 
-def main():
-    apps = get_app_list()
-    results = []
+def get_store_info(appid):
+    try:
+        res = requests.get(INFO_URL.format(appid=appid)).json()
+        data = res[str(appid)]
+        if not data["success"]:
+            return None
 
-    for app in apps[:5000]:
-        info = get_review_info(app["appid"])
-        if info:
-            results.append(info)
-        time.sleep(0.5)
+        info = data["data"]
+        return {
+            "name": info.get("name", "Unknown"),
+            "image": info.get("header_image", None),
+        }
+    except:
+        return None
+
+
+def main():
+    results = []
+    checked = 0
+
+    for appid in APP_IDS:
+        checked += 1
+        review = get_review_info(appid)
+        if not review:
+            continue
+
+        store = get_store_info(appid)
+        if not store:
+            continue
+
+        game = {**review, **store}
+        results.append(game)
+
+        print(f"{appid} OK ({len(results)} games)")
+
+        if len(results) >= 2000:
+            break
+
+        time.sleep(0.3)  # 負荷軽減
 
     results.sort(key=lambda x: x["rating"], reverse=True)
-    results = results[:3000]
 
     with open("ranking.json", "w", encoding="utf-8") as f:
         json.dump(results, f, ensure_ascii=False, indent=2)
+
+    print("Done! Collected:", len(results))
 
 
 if __name__ == "__main__":
