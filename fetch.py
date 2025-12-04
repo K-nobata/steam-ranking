@@ -3,7 +3,7 @@ import json
 import time
 
 
-APP_IDS = range(1, 800000)  # 1〜80万の範囲を総当り
+APP_IDS = range(1, 10000)  # 1〜80万の範囲を総当り
 REVIEWS_URL = "https://store.steampowered.com/appreviews/{appid}?json=1&language=japanese"
 INFO_URL = "https://store.steampowered.com/api/appdetails?appids={appid}&l=japanese"
 
