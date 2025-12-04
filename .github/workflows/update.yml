@@ -5,7 +5,7 @@ name: Update Ranking
 
 on:
   schedule:
-    - cron: "0 5 * * *"  # 毎日0時 (JSTでは9時)
+    - cron: "0 0 * * *"  # 毎日0時 (JSTでは9時)
   workflow_dispatch:
 
 jobs:
